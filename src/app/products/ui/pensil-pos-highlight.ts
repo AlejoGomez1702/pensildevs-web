@@ -15,7 +15,7 @@ const HIGHLIGHTED_FEATURES = 3;
   template: `
     <section
       aria-labelledby="pensil-pos-highlight-title"
-      class="overflow-hidden rounded-[2rem] bg-graphite text-on-graphite [--focus:var(--pencil)]"
+      class="overflow-hidden rounded-4xl bg-graphite text-on-graphite [--focus:var(--pencil)]"
     >
       <div class="grid items-center gap-12 p-8 pb-16 sm:p-12 sm:pb-20 lg:grid-cols-2 lg:p-16 lg:pb-20">
         <div>

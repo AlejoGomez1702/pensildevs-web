@@ -88,7 +88,7 @@
       @for (item of questions; track item.question) {
         <details class="group card p-0 [&_summary::-webkit-details-marker]:hidden">
           <summary
-            class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[var(--radius-card)] p-5 text-lg font-semibold"
+            class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-card p-5 text-lg font-semibold"
           >
             {{ item.question }}
             <span
@@ -108,10 +108,10 @@
 </section>
 
 <section aria-labelledby="home-cta-title" class="container-page py-20 sm:py-28">
-  <div class="relative overflow-hidden rounded-[2rem] bg-pencil px-8 py-14 text-on-pencil sm:px-14">
+  <div class="relative overflow-hidden rounded-4xl bg-pencil px-8 py-14 text-on-pencil sm:px-14">
     <svg
       viewBox="0 0 400 120"
-      class="absolute -right-10 -bottom-6 w-[28rem] max-w-none opacity-30"
+      class="absolute -right-10 -bottom-6 w-md max-w-none opacity-30"
       fill="none"
       aria-hidden="true"
     >

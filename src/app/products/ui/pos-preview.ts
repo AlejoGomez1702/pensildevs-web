@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   host: { class: 'block', 'aria-hidden': 'true' },
   template: `
     <div class="relative mx-auto w-full max-w-md">
-      <div class="absolute -inset-4 -z-10 rotate-2 rounded-[2rem] bg-pencil/25 blur-2xl"></div>
+      <div class="absolute -inset-4 -z-10 rotate-2 rounded-4xl bg-pencil/25 blur-2xl"></div>
       <div class="overflow-hidden rounded-3xl border border-line bg-paper-raised text-ink shadow-2xl">
         <div class="flex items-center justify-between border-b border-line px-5 py-3">
           <span class="font-display font-extrabold">Pensil<span class="text-pencil-text">.Pos</span></span>
@@ -33,7 +33,7 @@ import { Component } from '@angular/core';
           </div>
         </div>
       </div>
-      <div class="absolute -bottom-12 left-4 hidden rotate-[-3deg] rounded-2xl border border-line bg-paper-raised px-4 py-3 text-sm text-ink shadow-xl sm:block">
+      <div class="absolute -bottom-12 left-4 hidden -rotate-3 rounded-2xl border border-line bg-paper-raised px-4 py-3 text-sm text-ink shadow-xl sm:block">
         <p class="font-semibold">Stock bajo</p>
         <p class="text-ink-muted">Café molido · quedan 3</p>
       </div>

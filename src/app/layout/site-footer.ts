@@ -61,7 +61,7 @@ import { Logo } from '../shared/ui/logo';
             </a>
           </li>
           <li>
-            <a [href]="'mailto:' + email" class="break-words text-on-graphite/80 hover:text-on-graphite">{{ email }}</a>
+            <a [href]="'mailto:' + email" class="wrap-break-word text-on-graphite/80 hover:text-on-graphite">{{ email }}</a>
           </li>
         </ul>
       </div>

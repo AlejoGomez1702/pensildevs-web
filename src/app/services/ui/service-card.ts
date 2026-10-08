@@ -19,7 +19,7 @@ import type { ServiceOffering } from './service-offerings';
       <h3 class="mt-5 text-xl font-bold">
         <a
           [routerLink]="['/servicios', offering().slug]"
-          class="after:absolute after:inset-0 after:rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-3 focus-visible:after:outline-focus"
+          class="after:absolute after:inset-0 after:rounded-card focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-3 focus-visible:after:outline-focus"
         >
           {{ offering().title }}
         </a>

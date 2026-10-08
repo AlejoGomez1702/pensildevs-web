@@ -8,10 +8,10 @@ import { Component } from '@angular/core';
   selector: 'app-sketch-to-product',
   host: { class: 'block', 'aria-hidden': 'true' },
   template: `
-    <div class="relative mx-auto aspect-[5/4] w-full max-w-lg">
+    <div class="relative mx-auto aspect-5/4 w-full max-w-lg">
       <!-- Sketch -->
       <div
-        class="absolute top-0 left-0 h-[78%] w-[78%] -rotate-6 rounded-3xl border-2 border-dashed border-ink-muted/60 bg-paper-raised/60 p-6"
+        class="absolute top-0 left-0 size-[78%]  -rotate-6 rounded-3xl border-2 border-dashed border-ink-muted/60 bg-paper-raised/60 p-6"
       >
         <div class="h-3 w-1/3 rounded-full border-2 border-ink-muted/50"></div>
         <div class="mt-5 grid grid-cols-3 gap-3">

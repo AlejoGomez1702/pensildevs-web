@@ -135,7 +135,7 @@
   }
 
   .card {
-    @apply rounded-[var(--radius-card)] border border-line bg-paper-raised shadow-[var(--shadow-card)];
+    @apply rounded-card border border-line bg-paper-raised shadow-(--shadow-card);
   }
 
   .form-control {

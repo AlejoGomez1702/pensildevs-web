@@ -33,7 +33,7 @@
             @if (open) {
               <div
                 [id]="'submenu-' + item.id"
-                class="card absolute top-full left-0 mt-3 w-[22rem] max-w-[calc(100vw-2rem)] p-2"
+                class="card absolute top-full left-0 mt-3 w-88 max-w-[calc(100vw-2rem)] p-2"
               >
                 <ul class="grid gap-1">
                   @for (link of item.links; track link.path) {

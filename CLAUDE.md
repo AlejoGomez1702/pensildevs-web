@@ -67,7 +67,7 @@ Módulos propuestos (por confirmar al escribir las primeras specs): `products`, 
 6. `ui/` invoca casos de uso con `inject()`. NO DEBE llamar a `HttpClient` ni a adaptadores directamente.
 7. Un módulo solo usa a otro a través de su `index.ts`. Importar carpetas internas de otro módulo está prohibido.
 8. `app.routes.ts` y `layout/` no contienen lógica de negocio.
-9. Estas reglas las hace cumplir `eslint-plugin-boundaries` (`eslint.config.js`); una violación rompe `npm run lint`. NO DEBE desactivarse la regla con `eslint-disable` para pasar el lint: si una dependencia parece necesaria, se discute en un ADR.
+9. Estas reglas las hace cumplir `eslint-plugin-boundaries` (`eslint.config.mjs`); una violación rompe `npm run lint`. NO DEBE desactivarse la regla con `eslint-disable` para pasar el lint: si una dependencia parece necesaria, se discute en un ADR.
 
 ### Pragmatismo permitido
 
@@ -160,6 +160,7 @@ Reglas:
 - Libro de marca, tokens, componentes e íconos: [design system Pensil.Devs](https://claude.ai/artifact/VHJ42zPuF6Az213tbnmWff). Un agente lo lee con la acción `read` del Artifact tool (`path: project/README.md`).
 - La fuente de verdad de los valores es `src/styles.css`. Un cambio de token se hace ahí y se refleja en el design system en el mismo pull request.
 - Los componentes usan solo tokens semánticos (`bg-forest`, `text-leaf-text`, `btn-primary`…); NO DEBEN usarse colores literales ni clases de color de Tailwind por defecto (`bg-green-700`).
+- Las clases de Tailwind se escriben en su forma canónica: la utilidad de la escala o del token antes que un valor arbitrario (`rounded-card`, no `rounded-[var(--radius-card)]`; `w-88`, no `w-[22rem]`; `size-[78%]`, no `h-[78%] w-[78%]`). Es la misma advertencia `suggestCanonicalClasses` de Tailwind CSS IntelliSense, y la hace cumplir `better-tailwindcss/enforce-canonical-classes` en `.ts`, `.html` y `.css` (incluido `@apply`); una violación rompe `npm run lint`. `npx eslint src --fix` reescribe las clases solo. NO DEBE silenciarse con `eslint-disable` ni con la opción `ignore`.
 
 ## Angular moderno (v22) y lo último en general
 

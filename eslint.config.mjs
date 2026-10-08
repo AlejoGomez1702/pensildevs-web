@@ -1,10 +1,13 @@
 // @ts-check
-const eslint = require('@eslint/js');
-const { defineConfig } = require('eslint/config');
-const tseslint = require('typescript-eslint');
-const angular = require('angular-eslint');
-const boundaries = require('eslint-plugin-boundaries');
-const sonarjs = require('eslint-plugin-sonarjs');
+import css from '@eslint/css';
+import eslint from '@eslint/js';
+import angular from 'angular-eslint';
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
+import boundaries from 'eslint-plugin-boundaries';
+import sonarjs from 'eslint-plugin-sonarjs';
+import { defineConfig } from 'eslint/config';
+import { tailwind4 } from 'tailwind-csstree';
+import tseslint from 'typescript-eslint';
 
 const sameModule = { module: '{{from.element.captured.module}}' };
 const kernel = { element: { type: 'kernel' } };
@@ -16,7 +19,7 @@ const ownLayers = (...types) => ({
   element: { types: { anyOf: types }, captured: sameModule },
 });
 
-module.exports = defineConfig([
+export default defineConfig([
   {
     ignores: ['dist/', 'coverage/', '.angular/'],
   },
@@ -183,5 +186,20 @@ module.exports = defineConfig([
       '@angular-eslint/template/prefer-self-closing-tags': 'error',
       '@angular-eslint/template/prefer-ngsrc': 'error',
     },
+  },
+  {
+    // Same check as the `suggestCanonicalClasses` warning of Tailwind CSS IntelliSense, but blocking
+    // and project-wide. `npm run lint -- --fix` rewrites the classes to their canonical form.
+    files: ['src/**/*.ts', 'src/**/*.html', 'src/**/*.css'],
+    plugins: { 'better-tailwindcss': betterTailwindcss },
+    settings: { 'better-tailwindcss': { entryPoint: 'src/styles.css' } },
+    rules: { 'better-tailwindcss/enforce-canonical-classes': 'error' },
+  },
+  {
+    // Parses CSS (with Tailwind's at-rules) so the rule above also checks `@apply`.
+    files: ['src/**/*.css'],
+    plugins: { css },
+    language: 'css/css',
+    languageOptions: { customSyntax: tailwind4, tolerant: true },
   },
 ]);

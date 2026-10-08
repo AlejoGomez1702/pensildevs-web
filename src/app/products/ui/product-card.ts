@@ -20,7 +20,7 @@ import type { ProductSummary } from './product-catalog';
       <h3 class="mt-1 text-xl font-bold">
         <a
           [routerLink]="['/productos', product().slug]"
-          class="after:absolute after:inset-0 after:rounded-[var(--radius-card)] focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-3 focus-visible:after:outline-focus"
+          class="after:absolute after:inset-0 after:rounded-card focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-3 focus-visible:after:outline-focus"
         >
           {{ product().name }}
         </a>
