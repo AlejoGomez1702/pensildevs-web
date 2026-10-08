@@ -50,6 +50,8 @@ module.exports = defineConfig([
       '@angular-eslint/prefer-signals': 'error',
       '@angular-eslint/prefer-output-emitter-ref': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
+      // Presentational Angular components can legitimately have an empty class body.
+      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
       'sonarjs/cognitive-complexity': ['error', 15],
       'max-params': ['error', 3],
       'no-console': ['error', { allow: ['error'] }],

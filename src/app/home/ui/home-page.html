@@ -1,0 +1,137 @@
+<section aria-labelledby="home-title" class="relative overflow-hidden">
+  <div class="notebook-grid absolute inset-0 -z-10" aria-hidden="true"></div>
+  <div class="container-page grid items-center gap-16 pt-14 pb-20 sm:pt-20 lg:grid-cols-2 lg:pb-28">
+    <div>
+      <p class="eyebrow">Productos y servicios de software</p>
+      <h1 id="home-title" class="mt-4 text-5xl leading-[1.05] font-extrabold sm:text-6xl lg:text-7xl">
+        Software que le <span class="scribble">simplifica</span> la vida a tu negocio
+      </h1>
+      <p class="mt-6 max-w-xl text-lg text-ink-muted sm:text-xl">
+        Creamos puntos de venta, tiendas en línea y automatizaciones a la medida. Tú te enfocas en tus
+        clientes; nosotros, en que la tecnología funcione.
+      </p>
+      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        <app-whatsapp-link message="Hola, Pensil.Devs. Me gustaría platicar sobre mi negocio." />
+        <a routerLink="/servicios" class="btn-secondary">
+          Ver servicios
+          <app-icon name="arrow-right" class="size-5" />
+        </a>
+      </div>
+      <ul class="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-ink-muted">
+        <li class="flex items-center gap-2"><app-icon name="check" class="size-4 text-leaf-text" />Primera plática sin costo</li>
+        <li class="flex items-center gap-2"><app-icon name="check" class="size-4 text-leaf-text" />Propuesta clara por etapas</li>
+        <li class="flex items-center gap-2"><app-icon name="check" class="size-4 text-leaf-text" />Código a tu nombre</li>
+      </ul>
+    </div>
+    <app-sketch-to-product />
+  </div>
+</section>
+
+<section aria-labelledby="home-promises-title" class="border-y border-line bg-paper-raised">
+  <h2 id="home-promises-title" class="sr-only">Por qué trabajar con Pensil.Devs</h2>
+  <ul class="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    @for (promise of promises; track promise.title) {
+      <li class="flex gap-4">
+        <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-leaf-soft text-leaf-text">
+          <app-icon [name]="promise.icon" class="size-5" />
+        </span>
+        <div>
+          <h3 class="font-sans text-base font-semibold tracking-normal">{{ promise.title }}</h3>
+          <p class="mt-1 text-sm text-ink-muted">{{ promise.description }}</p>
+        </div>
+      </li>
+    }
+  </ul>
+</section>
+
+<section aria-labelledby="home-services-title" class="container-page py-20 sm:py-28">
+  <div class="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+    <app-section-heading
+      headingId="home-services-title"
+      eyebrow="Servicios"
+      title="¿Qué necesita tu negocio?"
+      intro="Elige por dónde empezar. Si no lo tienes claro, lo definimos juntos."
+    />
+    <a routerLink="/servicios" class="text-link shrink-0">Ver todos los servicios</a>
+  </div>
+  <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    @for (offering of offerings; track offering.slug) {
+      <li><app-service-card [offering]="offering" /></li>
+    }
+  </ul>
+</section>
+
+<div class="container-page">
+  <app-pensil-pos-highlight />
+</div>
+
+<section aria-labelledby="home-process-title" class="container-page py-20 sm:py-28">
+  <app-section-heading
+    headingId="home-process-title"
+    eyebrow="Cómo trabajamos"
+    title="Del boceto al producto"
+    intro="Así como un buen proyecto empieza con un lápiz, el tuyo empieza con una plática y un boceto que puedes tocar."
+  />
+  <app-delivery-process class="mt-12 block" />
+</section>
+
+<section aria-labelledby="home-faq-title" class="bg-paper-sunken py-20 sm:py-28">
+  <div class="container-page grid gap-12 lg:grid-cols-12">
+    <app-section-heading
+      class="lg:col-span-5"
+      headingId="home-faq-title"
+      eyebrow="Preguntas frecuentes"
+      title="Lo que más nos preguntan"
+      intro="¿Tienes otra duda? Escríbenos y te respondemos sin compromiso."
+    />
+    <div class="grid gap-3 lg:col-span-7">
+      @for (item of questions; track item.question) {
+        <details class="group card p-0 [&_summary::-webkit-details-marker]:hidden">
+          <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[var(--radius-card)] p-5 text-lg font-semibold"
+          >
+            {{ item.question }}
+            <span
+              class="grid size-8 shrink-0 place-items-center rounded-full bg-paper-sunken transition-transform group-open:rotate-45"
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </span>
+          </summary>
+          <p class="px-5 pb-5 text-ink-muted">{{ item.answer }}</p>
+        </details>
+      }
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="home-cta-title" class="container-page py-20 sm:py-28">
+  <div class="relative overflow-hidden rounded-[2rem] bg-pencil px-8 py-14 text-on-pencil sm:px-14">
+    <svg
+      viewBox="0 0 400 120"
+      class="absolute -right-10 -bottom-6 w-[28rem] max-w-none opacity-30"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M4 100 C 80 20, 140 110, 220 50 S 340 10, 396 40" stroke="currentColor" stroke-width="6" stroke-linecap="round" />
+    </svg>
+    <div class="relative max-w-2xl">
+      <h2 id="home-cta-title" class="text-4xl font-extrabold sm:text-5xl">¿Tienes una idea o algo que resolver?</h2>
+      <p class="mt-4 text-lg">Cuéntanos en un mensaje. La primera plática es sin costo y sin compromiso.</p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a class="btn bg-graphite text-on-graphite hover:bg-graphite/90" routerLink="/contacto">
+          Escribir mi mensaje
+          <app-icon name="arrow-right" class="size-5" />
+        </a>
+        <app-whatsapp-link
+          appearance="secondary"
+          message="Hola, Pensil.Devs. Tengo una idea y me gustaría platicarla."
+        >
+          Mejor por WhatsApp
+        </app-whatsapp-link>
+      </div>
+    </div>
+  </div>
+</section>

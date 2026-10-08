@@ -1,0 +1,176 @@
+<section aria-labelledby="contact-title" class="relative overflow-hidden">
+  <div class="notebook-grid absolute inset-0 -z-10" aria-hidden="true"></div>
+
+  <div class="container-page grid gap-12 py-16 sm:py-20 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-7">
+      <p class="eyebrow">Contacto</p>
+      <h1 id="contact-title" class="mt-3 text-4xl font-extrabold sm:text-5xl">
+        Cuéntanos qué <span class="scribble">necesitas</span>
+      </h1>
+      <p class="mt-4 max-w-xl text-lg text-ink-muted">
+        Llena el formulario y se abrirá WhatsApp con tu mensaje listo para enviar. Así hablas
+        directo con nuestro equipo, sin esperar correos.
+      </p>
+
+      <form [formRoot]="contactForm" class="card mt-10 grid gap-6 p-6 sm:p-8" aria-describedby="contact-form-hint">
+        <p id="contact-form-hint" class="text-sm text-ink-muted">
+          Los campos marcados con <span aria-hidden="true">*</span><span class="sr-only">asterisco</span> son obligatorios.
+        </p>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div class="grid gap-2">
+            <label for="contact-name" class="font-semibold">Nombre <span aria-hidden="true">*</span></label>
+            <input
+              id="contact-name"
+              type="text"
+              autocomplete="name"
+              class="form-control"
+              [formField]="contactForm.name"
+              [attr.aria-invalid]="contactForm.name().touched() && contactForm.name().invalid()"
+              [attr.aria-describedby]="contactForm.name().touched() && contactForm.name().invalid() ? 'contact-name-error' : null"
+            />
+            @if (contactForm.name().touched() && contactForm.name().invalid()) {
+              <p id="contact-name-error" class="form-error">
+                <app-icon name="close" class="size-4" />{{ contactForm.name().errors()[0]?.message }}
+              </p>
+            }
+          </div>
+
+          <div class="grid gap-2">
+            <label for="contact-email" class="font-semibold">Correo electrónico <span aria-hidden="true">*</span></label>
+            <input
+              id="contact-email"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              class="form-control"
+              [formField]="contactForm.email"
+              [attr.aria-invalid]="contactForm.email().touched() && contactForm.email().invalid()"
+              [attr.aria-describedby]="contactForm.email().touched() && contactForm.email().invalid() ? 'contact-email-error' : null"
+            />
+            @if (contactForm.email().touched() && contactForm.email().invalid()) {
+              <p id="contact-email-error" class="form-error">
+                <app-icon name="close" class="size-4" />{{ contactForm.email().errors()[0]?.message }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="grid gap-2">
+          <label for="contact-interest" class="font-semibold">¿Qué te interesa?</label>
+          <select id="contact-interest" class="form-control" [formField]="contactForm.interest">
+            <option value="">Elige una opción (opcional)</option>
+            @for (option of interestOptions; track option.slug) {
+              <option [value]="option.label">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid gap-2">
+          <label for="contact-message" class="font-semibold">Cuéntanos qué necesitas <span aria-hidden="true">*</span></label>
+          <textarea
+            id="contact-message"
+            rows="5"
+            class="form-control resize-y"
+            placeholder="Por ejemplo: tengo una tienda de ropa y quiero vender en línea."
+            [formField]="contactForm.message"
+            [attr.aria-invalid]="contactForm.message().touched() && contactForm.message().invalid()"
+            [attr.aria-describedby]="
+              contactForm.message().touched() && contactForm.message().invalid()
+                ? 'contact-message-error contact-message-count'
+                : 'contact-message-count'
+            "
+          ></textarea>
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            @if (contactForm.message().touched() && contactForm.message().invalid()) {
+              <p id="contact-message-error" class="form-error">
+                <app-icon name="close" class="size-4" />{{ contactForm.message().errors()[0]?.message }}
+              </p>
+            }
+            <p id="contact-message-count" class="ml-auto text-sm text-ink-muted">
+              {{ messageLength() }} / {{ messageMaxLength }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm text-ink-muted">Solo usamos tus datos para responder tu mensaje.</p>
+          <button type="submit" class="btn-primary" [disabled]="contactForm().submitting()">
+            <app-icon name="chat" class="size-5" />
+            {{ contactForm().submitting() ? 'Abriendo WhatsApp…' : 'Enviar por WhatsApp' }}
+          </button>
+        </div>
+
+        <div role="status" aria-live="polite">
+          @switch (outcome().status) {
+            @case ('sent') {
+              <div class="flex gap-3 rounded-2xl border border-leaf/30 bg-leaf-soft p-4">
+                <app-icon name="check" class="mt-0.5 size-5 text-leaf-text" />
+                <p>
+                  <strong>Abrimos WhatsApp con tu mensaje.</strong> Solo falta que lo envíes desde ahí y
+                  te responderemos lo antes posible.
+                </p>
+              </div>
+            }
+            @case ('blocked') {
+              @if (outcome(); as blocked) {
+                @if (blocked.status === 'blocked') {
+                  <div class="rounded-2xl border border-pencil bg-paper-sunken p-4">
+                    <p>
+                      <strong>Tu navegador no pudo abrir WhatsApp.</strong> Tu mensaje está listo:
+                      <a class="text-link" [href]="blocked.fallbackUrl" target="_blank" rel="noopener">
+                        ábrelo en WhatsApp<span class="sr-only"> (se abre en una pestaña nueva)</span>
+                      </a>
+                      o escríbenos a
+                      <a class="text-link" [href]="'mailto:' + companyEmail">{{ companyEmail }}</a>.
+                    </p>
+                  </div>
+                }
+              }
+            }
+            @case ('failed') {
+              <p class="form-error">
+                No pudimos preparar tu mensaje. Revisa los datos o escríbenos a
+                <a class="text-link" [href]="'mailto:' + companyEmail">{{ companyEmail }}</a>.
+              </p>
+            }
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="lg:col-span-5 lg:pt-28">
+      <div class="rounded-[var(--radius-card)] bg-graphite p-8 text-on-graphite">
+        <h2 id="contact-direct-title" class="text-2xl font-bold">¿Prefieres escribir directo?</h2>
+        <p class="mt-3 text-on-graphite/80">
+          Mándanos un WhatsApp o un correo. Hablas con las personas que diseñan y construyen tu
+          proyecto.
+        </p>
+        <div class="mt-6 flex flex-col gap-3">
+          <app-whatsapp-link message="Hola, Pensil.Devs. Me gustaría platicar sobre un proyecto." />
+          <a class="btn-on-dark" [href]="'mailto:' + companyEmail">
+            <app-icon name="mail" class="size-5" />{{ companyEmail }}
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-8 px-2">
+        <h2 class="text-lg font-bold">¿Qué pasa después?</h2>
+        <ol class="mt-4 grid gap-4">
+          <li class="flex gap-3">
+            <span class="step-dot">1</span>
+            <p class="text-ink-muted">Leemos tu mensaje y te hacemos las preguntas necesarias.</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="step-dot">2</span>
+            <p class="text-ink-muted">Agendamos una llamada corta para entender tu negocio.</p>
+          </li>
+          <li class="flex gap-3">
+            <span class="step-dot">3</span>
+            <p class="text-ink-muted">Te enviamos una propuesta clara, con alcance, tiempos y costo.</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
