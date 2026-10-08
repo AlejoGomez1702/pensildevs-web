@@ -13,6 +13,21 @@ describe('Site header', () => {
   const menuButton = () =>
     header.querySelector<HTMLButtonElement>('button[aria-controls="mobile-menu"]') as HTMLButtonElement;
   const mobileMenu = () => header.querySelector<HTMLElement>('#mobile-menu');
+  const mainNavigation = () => header.querySelector<HTMLElement>('nav[aria-label="Principal"]') as HTMLElement;
+  const trigger = (label: string) => {
+    const button = Array.from(mainNavigation().querySelectorAll('button')).find(
+      (element) => element.textContent?.trim() === label,
+    );
+    if (!button) {
+      throw new Error(`No submenu trigger labelled "${label}"`);
+    }
+    return button;
+  };
+  const submenuOf = (label: string) => {
+    const id = trigger(label).getAttribute('aria-controls');
+    return id ? header.querySelector<HTMLElement>(`#${id}`) : null;
+  };
+  const settle = () => fixture.whenStable();
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -20,55 +35,191 @@ describe('Site header', () => {
     });
     fixture = TestBed.createComponent(SiteHeader);
     header = fixture.nativeElement;
-    await fixture.whenStable();
+    document.body.append(header);
+    await settle();
   });
+
+  afterEach(() => header.remove());
 
   it('links the logo to the home page with an accessible name', () => {
     const home = header.querySelector('a[href="/"]');
     expect(home?.getAttribute('aria-label')).toContain('Pensil.Devs');
   });
 
-  it('opens and closes the mobile menu, announcing its state', async () => {
-    expect(menuButton().getAttribute('aria-expanded')).toBe('false');
-    expect(mobileMenu()).toBeNull();
+  describe('desktop navigation', () => {
+    it('offers Productos and Servicios as closed submenus, then Contacto', () => {
+      const items = Array.from(mainNavigation().querySelectorAll(':scope > ul > li > :is(a, button)'));
 
-    menuButton().click();
-    await fixture.whenStable();
+      expect(items.map((item) => item.textContent?.trim())).toEqual(['Productos', 'Servicios', 'Contacto']);
+      expect(trigger('Productos').getAttribute('aria-expanded')).toBe('false');
+      expect(trigger('Servicios').getAttribute('aria-expanded')).toBe('false');
+      expect(submenuOf('Productos')).toBeNull();
+      expect(mainNavigation().querySelector('a[href="/contacto"]')).not.toBeNull();
+    });
 
-    expect(menuButton().getAttribute('aria-expanded')).toBe('true');
-    expect(mobileMenu()?.querySelectorAll('a').length).toBeGreaterThanOrEqual(3);
+    it('opens the products submenu with each product and a link to all of them', async () => {
+      trigger('Productos').click();
+      await settle();
 
-    menuButton().click();
-    await fixture.whenStable();
-    expect(mobileMenu()).toBeNull();
+      expect(trigger('Productos').getAttribute('aria-expanded')).toBe('true');
+      const submenu = submenuOf('Productos');
+      expect(submenu?.querySelector('a[href="/productos/pensil-pos"]')?.textContent).toContain('Pensil.Pos');
+      expect(submenu?.querySelector('a[href="/productos"]')?.textContent?.trim()).toBe('Ver todos los productos');
+    });
+
+    it('opens the services submenu with every service and a link to all of them', async () => {
+      trigger('Servicios').click();
+      await settle();
+
+      const submenu = submenuOf('Servicios');
+      expect(submenu?.querySelectorAll('a[href^="/servicios/"]')).toHaveLength(4);
+      expect(submenu?.querySelector('a[href="/servicios/tiendas-en-linea"]')?.textContent).toContain(
+        'Tiendas en línea',
+      );
+      expect(submenu?.querySelector('a[href="/servicios"]')?.textContent?.trim()).toBe('Ver todos los servicios');
+    });
+
+    it('keeps only one submenu open at a time', async () => {
+      trigger('Productos').click();
+      await settle();
+      trigger('Servicios').click();
+      await settle();
+
+      expect(trigger('Productos').getAttribute('aria-expanded')).toBe('false');
+      expect(submenuOf('Productos')).toBeNull();
+      expect(submenuOf('Servicios')).not.toBeNull();
+    });
+
+    it('closes the submenu when its trigger is activated again', async () => {
+      trigger('Productos').click();
+      await settle();
+      trigger('Productos').click();
+      await settle();
+
+      expect(submenuOf('Productos')).toBeNull();
+    });
+
+    it('closes the submenu with Escape and returns focus to its trigger', async () => {
+      trigger('Servicios').click();
+      await settle();
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await settle();
+
+      expect(submenuOf('Servicios')).toBeNull();
+      expect(document.activeElement).toBe(trigger('Servicios'));
+    });
+
+    it('closes the submenu when clicking outside the navigation', async () => {
+      trigger('Productos').click();
+      await settle();
+
+      document.body.click();
+      await settle();
+
+      expect(submenuOf('Productos')).toBeNull();
+    });
+
+    it('closes the submenu when focus leaves the navigation', async () => {
+      trigger('Productos').click();
+      await settle();
+
+      const outside = header.querySelector('a[href="/"]') as HTMLElement;
+      trigger('Productos').dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: outside }));
+      await settle();
+
+      expect(submenuOf('Productos')).toBeNull();
+    });
+
+    it('keeps the submenu open while focus moves inside it', async () => {
+      trigger('Productos').click();
+      await settle();
+
+      const inside = submenuOf('Productos')?.querySelector('a') as HTMLElement;
+      trigger('Productos').dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: inside }));
+      await settle();
+
+      expect(submenuOf('Productos')).not.toBeNull();
+    });
+
+    it('closes the submenu after choosing a destination', async () => {
+      trigger('Servicios').click();
+      await settle();
+
+      submenuOf('Servicios')?.querySelector<HTMLAnchorElement>('a[href="/servicios/automatizacion"]')?.click();
+      await settle();
+
+      expect(TestBed.inject(Router).url).toBe('/servicios/automatizacion');
+      expect(submenuOf('Servicios')).toBeNull();
+    });
+
+    it('marks the section of the current page and the current page inside its submenu', async () => {
+      await TestBed.inject(Router).navigateByUrl('/productos/pensil-pos');
+      await settle();
+
+      expect(trigger('Productos').getAttribute('aria-current')).toBe('true');
+      expect(trigger('Servicios').hasAttribute('aria-current')).toBe(false);
+
+      trigger('Productos').click();
+      await settle();
+      const current = submenuOf('Productos')?.querySelector('a[aria-current="page"]');
+      expect(current?.getAttribute('href')).toBe('/productos/pensil-pos');
+    });
+
+    it('marks Contacto as the current page', async () => {
+      await TestBed.inject(Router).navigateByUrl('/contacto');
+      await settle();
+
+      expect(mainNavigation().querySelector('a[aria-current="page"]')?.textContent?.trim()).toBe('Contacto');
+    });
   });
 
-  it('closes the mobile menu with Escape and returns focus to the button', async () => {
-    menuButton().click();
-    await fixture.whenStable();
+  describe('mobile menu', () => {
+    it('opens and closes, announcing its state', async () => {
+      expect(menuButton().getAttribute('aria-expanded')).toBe('false');
+      expect(mobileMenu()).toBeNull();
 
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    await fixture.whenStable();
+      menuButton().click();
+      await settle();
+      expect(menuButton().getAttribute('aria-expanded')).toBe('true');
 
-    expect(mobileMenu()).toBeNull();
-    expect(document.activeElement).toBe(menuButton());
-  });
+      menuButton().click();
+      await settle();
+      expect(mobileMenu()).toBeNull();
+    });
 
-  it('closes the mobile menu after choosing a destination', async () => {
-    menuButton().click();
-    await fixture.whenStable();
+    it('shows the products and services groups with their links visible, then Contacto', async () => {
+      menuButton().click();
+      await settle();
 
-    mobileMenu()?.querySelector<HTMLAnchorElement>('a[href="/servicios"]')?.click();
-    await fixture.whenStable();
+      const groups = Array.from(mobileMenu()?.querySelectorAll('h2') ?? []).map((title) => title.textContent?.trim());
+      expect(groups).toEqual(['Productos', 'Servicios']);
+      expect(mobileMenu()?.querySelector('a[href="/productos/pensil-pos"]')).not.toBeNull();
+      expect(mobileMenu()?.querySelector('a[href="/productos"]')).not.toBeNull();
+      expect(mobileMenu()?.querySelectorAll('a[href^="/servicios/"]')).toHaveLength(4);
+      expect(mobileMenu()?.querySelector('a[href="/contacto"]')).not.toBeNull();
+      expect(mobileMenu()?.querySelector('button')).toBeNull();
+    });
 
-    expect(mobileMenu()).toBeNull();
-  });
+    it('closes with Escape and returns focus to the button', async () => {
+      menuButton().click();
+      await settle();
 
-  it('marks the link of the current page', async () => {
-    await TestBed.inject(Router).navigateByUrl('/servicios');
-    await fixture.whenStable();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await settle();
 
-    const current = header.querySelector('nav[aria-label="Principal"] a[aria-current="page"]');
-    expect(current?.textContent?.trim()).toBe('Servicios');
+      expect(mobileMenu()).toBeNull();
+      expect(document.activeElement).toBe(menuButton());
+    });
+
+    it('closes after choosing a destination', async () => {
+      menuButton().click();
+      await settle();
+
+      mobileMenu()?.querySelector<HTMLAnchorElement>('a[href="/productos/pensil-pos"]')?.click();
+      await settle();
+
+      expect(mobileMenu()).toBeNull();
+    });
   });
 });

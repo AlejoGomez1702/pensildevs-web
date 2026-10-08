@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { COMPANY_CONTACT, companyWhatsAppUrl } from '../contact';
-import { PENSIL_POS } from '../products';
+import { PRODUCT_CATALOG } from '../products';
 import { SERVICE_OFFERINGS } from '../services';
 import { Logo } from '../shared/ui/logo';
 
@@ -35,21 +35,26 @@ import { Logo } from '../shared/ui/logo';
         </ul>
       </nav>
 
-      <nav aria-labelledby="footer-company" class="md:col-span-2">
-        <h2 id="footer-company" class="font-sans text-base font-semibold text-leaf-bright">
-          Producto
+      <nav aria-labelledby="footer-products" class="md:col-span-2">
+        <h2 id="footer-products" class="font-sans text-base font-semibold text-leaf-bright">
+          Productos
         </h2>
         <ul class="mt-4 grid gap-2">
-          <li>
-            <a routerLink="/productos/pensil-pos" class="text-on-graphite/80 hover:text-on-graphite">{{ productName }}</a>
-          </li>
-          <li><a routerLink="/contacto" class="text-on-graphite/80 hover:text-on-graphite">Contacto</a></li>
+          @for (product of products; track product.slug) {
+            <li>
+              <a [routerLink]="['/productos', product.slug]" class="text-on-graphite/80 hover:text-on-graphite">
+                {{ product.name }}
+              </a>
+            </li>
+          }
+          <li><a routerLink="/productos" class="text-on-graphite/80 hover:text-on-graphite">Ver todos los productos</a></li>
         </ul>
       </nav>
 
       <div class="md:col-span-3">
         <h2 class="font-sans text-base font-semibold text-leaf-bright">Escríbenos</h2>
         <ul class="mt-4 grid gap-2">
+          <li><a routerLink="/contacto" class="text-on-graphite/80 hover:text-on-graphite">Contacto</a></li>
           <li>
             <a [href]="whatsAppUrl" target="_blank" rel="noopener" class="text-on-graphite/80 hover:text-on-graphite">
               WhatsApp<span class="sr-only"> (se abre en una pestaña nueva)</span>
@@ -68,7 +73,7 @@ import { Logo } from '../shared/ui/logo';
 })
 export class SiteFooter {
   protected readonly offerings = SERVICE_OFFERINGS;
-  protected readonly productName = PENSIL_POS.name;
+  protected readonly products = PRODUCT_CATALOG;
   protected readonly email = COMPANY_CONTACT.email;
   protected readonly whatsAppUrl = companyWhatsAppUrl();
   protected readonly year = new Date().getFullYear();

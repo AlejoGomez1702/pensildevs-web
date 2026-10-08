@@ -3,6 +3,7 @@ import { Component, computed, input } from '@angular/core';
 /** Stroke icons drawn on a 24×24 grid. Decorative: the surrounding text carries the meaning. */
 const ICON_PATHS = {
   'arrow-right': ['M5 12h14', 'm13 6 6 6-6 6'],
+  'chevron-down': ['m6 9 6 6 6-6'],
   check: ['m5 12.5 4.5 4.5L19 7.5'],
   menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
   close: ['m6 6 12 12', 'M18 6 6 18'],

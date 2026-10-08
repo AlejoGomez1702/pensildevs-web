@@ -1,85 +1,49 @@
-import { Component, signal, viewChild, type ElementRef } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { WhatsAppLink } from '../contact';
 import { Icon } from '../shared/ui/icon';
 import { Logo } from '../shared/ui/logo';
-import { NAVIGATION_LINKS } from './navigation-links';
+import { NAVIGATION_ITEMS, type NavigationMenu } from './navigation-links';
+
+const NAVIGATION_MENUS = NAVIGATION_ITEMS.filter((item): item is NavigationMenu => item.kind === 'menu');
+
+const isWithinSection = (url: string, sectionPath: string) =>
+  url === sectionPath || url.startsWith(`${sectionPath}/`) || url.startsWith(`${sectionPath}?`);
 
 @Component({
   selector: 'app-site-header',
   imports: [Icon, Logo, RouterLink, RouterLinkActive, WhatsAppLink],
+  templateUrl: './site-header.html',
   host: {
     class: 'sticky top-0 z-40 block border-b border-line/70 bg-paper/85 backdrop-blur-md',
     role: 'banner',
-    '(document:keydown.escape)': 'closeMenuFromKeyboard()',
+    '(document:keydown.escape)': 'closeFromKeyboard()',
+    '(document:click)': 'closeSubmenuOnOutsideClick($event)',
   },
-  template: `
-    <div class="container-page flex h-18 items-center justify-between gap-6">
-      <a routerLink="/" aria-label="Pensil.Devs, ir al inicio" class="rounded-lg">
-        <app-logo />
-      </a>
-
-      <nav aria-label="Principal" class="hidden md:block">
-        <ul class="flex items-center gap-1">
-          @for (link of links; track link.path) {
-            <li>
-              <a
-                [routerLink]="link.path"
-                routerLinkActive="bg-paper-sunken text-ink"
-                ariaCurrentWhenActive="page"
-                class="rounded-full px-4 py-2 font-medium text-ink-muted transition-colors hover:text-ink"
-              >{{ link.label }}</a>
-            </li>
-          }
-        </ul>
-      </nav>
-
-      <div class="hidden md:block">
-        <app-whatsapp-link message="Hola, Pensil.Devs. Me gustaría platicar sobre un proyecto.">
-          Hablemos
-        </app-whatsapp-link>
-      </div>
-
-      <button
-        #menuButton
-        type="button"
-        class="grid size-12 place-items-center rounded-full border border-line bg-paper-raised md:hidden"
-        aria-controls="mobile-menu"
-        [attr.aria-expanded]="menuOpen()"
-        (click)="toggleMenu()"
-      >
-        <app-icon [name]="menuOpen() ? 'close' : 'menu'" class="size-6" />
-        <span class="sr-only">{{ menuOpen() ? 'Cerrar menú' : 'Abrir menú' }}</span>
-      </button>
-    </div>
-
-    @if (menuOpen()) {
-      <nav id="mobile-menu" aria-label="Menú móvil" class="border-t border-line bg-paper md:hidden">
-        <ul class="container-page grid gap-1 py-4">
-          @for (link of links; track link.path) {
-            <li>
-              <a
-                [routerLink]="link.path"
-                routerLinkActive="bg-paper-sunken"
-                ariaCurrentWhenActive="page"
-                class="flex min-h-12 items-center rounded-xl px-4 text-lg font-semibold"
-                (click)="closeMenu()"
-              >{{ link.label }}</a>
-            </li>
-          }
-          <li class="mt-3 grid">
-            <app-whatsapp-link message="Hola, Pensil.Devs. Me gustaría platicar sobre un proyecto." />
-          </li>
-        </ul>
-      </nav>
-    }
-  `,
 })
 export class SiteHeader {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly router = inject(Router);
+  private readonly mainNavigation = viewChild.required<ElementRef<HTMLElement>>('mainNavigation');
   private readonly menuButton = viewChild.required<ElementRef<HTMLButtonElement>>('menuButton');
 
-  protected readonly links = NAVIGATION_LINKS;
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  protected readonly items = NAVIGATION_ITEMS;
+  protected readonly whatsAppMessage = 'Hola, Pensil.Devs. Me gustaría platicar sobre un proyecto.';
   protected readonly menuOpen = signal(false);
+  protected readonly openSubmenu = signal<string | null>(null);
+  protected readonly activeSection = computed(
+    () => NAVIGATION_MENUS.find((menu) => isWithinSection(this.currentUrl(), menu.path))?.id ?? null,
+  );
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);
@@ -89,11 +53,39 @@ export class SiteHeader {
     this.menuOpen.set(false);
   }
 
-  protected closeMenuFromKeyboard(): void {
-    if (!this.menuOpen()) {
+  protected toggleSubmenu(id: string): void {
+    this.openSubmenu.update((open) => (open === id ? null : id));
+  }
+
+  protected closeSubmenu(): void {
+    this.openSubmenu.set(null);
+  }
+
+  protected closeSubmenuOnOutsideClick(event: MouseEvent): void {
+    if (!this.mainNavigation().nativeElement.contains(event.target as Node | null)) {
+      this.closeSubmenu();
+    }
+  }
+
+  protected closeSubmenuWhenFocusLeaves(event: FocusEvent): void {
+    // Without a target, focus left the page or landed on blank space (Safari does this when clicking
+    // a button); the outside-click handler covers the latter, so only a real element outside closes it.
+    const next = event.relatedTarget as Node | null;
+    if (next && !this.mainNavigation().nativeElement.contains(next)) {
+      this.closeSubmenu();
+    }
+  }
+
+  protected closeFromKeyboard(): void {
+    const submenu = this.openSubmenu();
+    if (submenu) {
+      this.closeSubmenu();
+      this.host.nativeElement.querySelector<HTMLElement>(`#submenu-trigger-${submenu}`)?.focus();
       return;
     }
-    this.closeMenu();
-    this.menuButton().nativeElement.focus();
+    if (this.menuOpen()) {
+      this.closeMenu();
+      this.menuButton().nativeElement.focus();
+    }
   }
 }

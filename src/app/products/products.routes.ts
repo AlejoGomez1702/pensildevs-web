@@ -11,5 +11,13 @@ export const PRODUCTS_ROUTES: Routes = [
     },
     loadComponent: () => import('./ui/pensil-pos-page').then((m) => m.PensilPosPage),
   },
-  { path: '', pathMatch: 'full', redirectTo: 'pensil-pos' },
+  {
+    path: '',
+    title: 'Productos',
+    data: {
+      [ROUTE_DESCRIPTION]:
+        'Productos de software listos para tu negocio, como Pensil.Pos, el punto de venta que tu equipo aprende en una tarde.',
+    },
+    loadComponent: () => import('./ui/products-page').then((m) => m.ProductsPage),
+  },
 ];

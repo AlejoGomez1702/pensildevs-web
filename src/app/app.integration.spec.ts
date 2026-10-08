@@ -52,6 +52,17 @@ describe('Site navigation (real routes and providers)', () => {
     ).not.toBeNull();
   });
 
+  it('lists the products catalog with its own title and description', async () => {
+    await visit('/productos');
+
+    expect(heading()).toContain('Productos');
+    expect(pageTitle()).toBe('Productos · Pensil.Devs');
+    expect(description()).toContain('Pensil.Pos');
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('main app-product-card a[href="/productos/pensil-pos"]'),
+    ).not.toBeNull();
+  });
+
   it('presents Pensil.Pos with its features', async () => {
     await visit('/productos/pensil-pos');
 
