@@ -19,4 +19,4 @@ El sitio de Pensil.Devs empieza con poco código, pero crecerá con productos, s
 
 - Las reglas de negocio se prueban con Vitest en milisegundos, sin TestBed.
 - Hay algo más de ceremonia en los módulos con lógica; se compensa omitiendo capas en los de solo contenido.
-- Hace falta un lint de límites para que las reglas se cumplan solas; mientras no exista, las verifica el revisor.
+- Las reglas las hace cumplir `eslint-plugin-boundaries` ; una violación hace fallar `npm run lint`.

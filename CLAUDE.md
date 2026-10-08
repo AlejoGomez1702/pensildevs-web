@@ -16,9 +16,14 @@ Sitio web de Pensil.Devs, compañía que ofrece productos y servicios de softwar
 ## Comandos
 
 ```
-npm start        # servidor de desarrollo
-npm test         # pruebas unitarias (Vitest vía ng test)
-npm run build    # build de producción
+npm start                  # servidor de desarrollo
+npm test                   # pruebas unitarias en modo watch
+npm run test:unit          # pruebas unitarias, una sola corrida
+npm run test:integration   # pruebas de integración (*.integration.spec.ts)
+npm run test:ci            # todas las pruebas con cobertura y umbrales
+npm run lint               # ESLint: reglas de Angular, sonarjs y límites de arquitectura
+npm run build              # build de producción
+npm run verify             # lint + test:ci + build. DEBE pasar antes de dar una tarea por terminada
 ```
 
 ## Arquitectura
@@ -60,7 +65,7 @@ Módulos propuestos (por confirmar al escribir las primeras specs): `products`, 
 6. `ui/` invoca casos de uso con `inject()`. NO DEBE llamar a `HttpClient` ni a adaptadores directamente.
 7. Un módulo solo usa a otro a través de su `index.ts`. Importar carpetas internas de otro módulo está prohibido.
 8. `app.routes.ts` y `layout/` no contienen lógica de negocio.
-9. Estas reglas DEBERÍAN hacerse cumplir con un lint de límites (`eslint-plugin-boundaries` o `dependency-cruiser`) en CI. Mientras no exista, el revisor las verifica primero.
+9. Estas reglas las hace cumplir `eslint-plugin-boundaries` (`eslint.config.js`); una violación rompe `npm run lint`. NO DEBE desactivarse la regla con `eslint-disable` para pasar el lint: si una dependencia parece necesaria, se discute en un ADR.
 
 ### Pragmatismo permitido
 
@@ -91,24 +96,35 @@ Flujo: `spec.md` → aprobación de una persona → `plan.md` validado contra la
 
 Rojo → verde → refactor es obligatorio en `domain/` y `application/`.
 
-| Capa | Prueba | Regla |
-| --- | --- | --- |
-| `domain/` | Unitaria (Vitest) | Sin mocks, sin TestBed, sin red; corre en milisegundos |
-| `application/` | Unitaria (Vitest) | Los puertos se sustituyen por implementaciones en memoria escritas a mano |
-| `infrastructure/` | Integración | `HttpTestingController` o el servicio real en modo prueba |
-| `ui/` | Componente (TestBed) | Solo componentes con comportamiento; nada de snapshots. Incluye verificación de accesibilidad |
-| Flujos críticos | E2E (Playwright, cuando se instale) | Viewport móvil |
+| Capa | Tipo | Archivo | Regla |
+| --- | --- | --- | --- |
+| `domain/` | Unitaria | `*.spec.ts` | Sin mocks, sin TestBed, sin Angular; solo se importa `vitest`. Corre en milisegundos |
+| `application/` | Unitaria | `*.spec.ts` | Los puertos se sustituyen por fakes en memoria escritos a mano (no `vi.mock`) |
+| `ui/` | Unitaria de componente | `*.spec.ts` | TestBed; se prueba lo que ve y hace el usuario (roles, textos, eventos), no detalles internos. Nada de snapshots |
+| `infrastructure/` | Integración | `*.integration.spec.ts` | Adaptador real contra `provideHttpClientTesting()` / `HttpTestingController` |
+| Composición del módulo | Integración | `*.integration.spec.ts` | `provide<Module>()` + rutas reales con `RouterTestingHarness`: la página llega al adaptador |
+| Flujos críticos | E2E (Playwright, cuando se instale) | `e2e/` | Viewport móvil |
+
+Configuración (Vitest a través de `@angular/build:unit-test`):
+
+- `angular.json` (`test`) decide qué corre: la configuración por defecto excluye `*.integration.spec.ts`; `-c integration` corre solo esas; `-c ci` corre todo con cobertura.
+- `vitest-base.config.mts` define el resto: orden aleatorio (`sequence.shuffle`), `restoreMocks` y umbrales de cobertura (80% global, 90% en `**/domain/**`). Bajar un umbral requiere ADR.
+- Globals de Vitest activos (`describe`, `it`, `expect`, `vi`); en `domain/` y `application/` se importan explícitamente desde `vitest` para que el archivo siga siendo TypeScript puro.
+- La app es zoneless: NO DEBE usarse `fakeAsync`/`tick` (requieren zone.js). Se usa `await fixture.whenStable()` y `vi.useFakeTimers()`.
+- Las pruebas no usan `RouterTestingModule` ni `HttpClientTestingModule`; se usan los `provide*` equivalentes.
+
+Reglas:
 
 - Un bug se corrige escribiendo primero la prueba que lo reproduce.
 - Los nombres de las pruebas describen comportamiento del negocio, no métodos.
 - Las pruebas no dependen del orden ni comparten estado.
 - El tiempo y los identificadores se inyectan (`Clock`, `IdGenerator`).
-- Cobertura mínima: 80% en código nuevo, 90% en `domain/`. Es un piso, no la meta.
+- Cobertura mínima: 80% global, 90% en `domain/` (la hace cumplir `npm run test:ci`). Es un piso, no la meta.
 - NO DEBE desactivarse ni saltarse una prueba para lograr un merge.
 
 ## Clean code
 
-1. TypeScript estricto; `any` prohibido, `unknown` más validación en los bordes.
+1. TypeScript estricto (`strict`, `noUncheckedIndexedAccess`, `strictTemplates`); `any` prohibido, `unknown` más validación en los bordes.
 2. Nombres con el vocabulario del negocio (`Product`, `ServiceOffering`, `ContactRequest`).
 3. Funciones cortas, un solo nivel de abstracción, complejidad cognitiva ≤ 15, máximo tres parámetros (después, un objeto con nombre).
 4. Errores esperados del negocio como `Result` tipado; excepciones solo para lo inesperado.
@@ -128,71 +144,66 @@ Rojo → verde → refactor es obligatorio en `domain/` y `application/`.
 ## Definition of Done
 
 - Cumple los criterios de aceptación de su spec o ticket.
-- Escrito con TDD; pruebas nuevas y existentes pasan.
-- Respeta las reglas de dependencia.
+- Escrito con TDD; `npm run verify` pasa (lint, pruebas con cobertura y build).
+- Usa las APIs modernas de Angular descritas abajo; ninguna API legada nueva.
 - Pasa AXE y WCAG AA; revisado en móvil.
 - Sin `any`, sin código muerto, sin `console.log`, sin secretos.
 - Spec, ADR y documentación actualizados si cambió lo que describen.
 - Pull request revisado y aprobado por una persona.
 
-## Angular Best Practices
+## Angular moderno (v22) y lo último en general
 
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+Se usa siempre la API más reciente y estable de Angular. Si existe una API nueva y una legada para lo mismo, la legada NO DEBE aparecer en código nuevo. Ante la duda se consulta la documentación de la versión instalada (MCP `angular-cli` → `search_documentation`, `get_best_practices`).
 
-### TypeScript Best Practices
+### Reactividad y detección de cambios
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid the `any` type; use `unknown` when type is uncertain
+- La app es **zoneless** (sin `zone.js`). NO DEBE agregarse `zone.js` ni `provideZoneChangeDetection()`.
+- `OnPush` es el default en v22: NO DEBE declararse `changeDetection` explícitamente.
+- Estado con **signals**: `signal()`, `computed()` para lo derivado, `linkedSignal()` para estado derivado que también se puede escribir. Se usa `set`/`update`, nunca `mutate`.
+- `effect()` solo para sincronizar con el mundo no reactivo (DOM, `localStorage`, analítica). NO DEBE usarse para derivar estado ni para copiar un signal en otro.
+- Datos asíncronos en `ui/` con `resource()` cuyo `loader` llama a un caso de uso. `httpResource()` NO DEBE usarse en `ui/` (sería `HttpClient` fuera de `infrastructure/`).
+- RxJS solo donde aporta (streams de eventos); para pasar entre mundos se usa `toSignal()` / `toObservable()`. Nada de `subscribe` manual en componentes.
 
-### Angular
+### Componentes y plantillas
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
-- Do NOT set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. `OnPush` is the default in Angular v22+.
-- Use signals for state management
-- Implement lazy loading for feature routes
-- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
-- Use `NgOptimizedImage` for all static images.
-  - `NgOptimizedImage` does not work for inline base64 images.
+- Componentes standalone. NO DEBE declararse `standalone: true` (es el default) ni crearse NgModules.
+- `input()`, `input.required()`, `output()`, `model()` y queries como signals (`viewChild()`, `viewChildren()`, `contentChild()`, `contentChildren()`). NO DEBEN usarse `@Input`, `@Output`, `@ViewChild` ni `@ContentChild`.
+- Bindings del host en la propiedad `host` del decorador. NO DEBEN usarse `@HostBinding` ni `@HostListener`.
+- Control flow nativo (`@if`, `@for` con `track`, `@switch`), `@let` para alias locales y `@defer` (con `on viewport` o `on idle`) para lo que está debajo del primer pliegue.
+- Bindings `[class.x]` / `[style.x]`. NO DEBEN usarse `ngClass` ni `ngStyle`, ni importarse `CommonModule`.
+- `NgOptimizedImage` (`ngSrc`) para toda imagen estática; etiquetas autocerradas (`<app-x />`).
+- Componentes pequeños; plantillas inline si son cortas. Rutas de `templateUrl`/`styleUrl` relativas al archivo TS.
+- Estilos con Tailwind 4; CSS de componente solo para lo que Tailwind no cubre.
 
-### Accessibility Requirements
+### Formularios
 
-- It MUST pass all AXE checks.
-- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+- Todo formulario nuevo DEBE usar **Signal Forms** (`@angular/forms/signals`): modelo en un `signal()`, `form(model, schema)`, directiva `[formField]` en la plantilla, validadores del esquema (`required()`, `email()`, `validate()` para reglas propias) y `submit()` para enviar.
+- NO DEBEN usarse formularios template-driven (`ngModel`) ni Reactive Forms en código nuevo.
+- La validación del formulario es experiencia de usuario. Al enviar, `ui/` pasa el valor a un caso de uso que vuelve a validar con los value objects del dominio y devuelve un `Result`.
+- Accesibilidad: cada campo con `<label>` asociado, errores anunciados (`aria-describedby`, `aria-invalid`) y foco al primer campo inválido al enviar.
 
-### Components
+### Inyección de dependencias y servicios
 
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `model()` for two-way bound properties with `[(prop)]` syntax instead of pairing `input()` with `output()`
-- Use `computed()` for derived state
-- Use `linkedSignal()` for state derived from multiple reactive sources that must stay synchronized
-- Prefer inline templates for small components
-- Prefer Signal Forms (`@angular/forms/signals`) for new forms. They are stable in Angular v22+ and provide signal-based state, type-safe field access, and schema-based validation
-- When not using Signal Forms, prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- Do NOT import `CommonModule`, import only the directives and pipes the template uses, such as `AsyncPipe` or `DatePipe`
-- When using external templates/styles, use paths relative to the component TS file.
+- `inject()` en clases de Angular; sin inyección por constructor (excepción: casos de uso puros, ver Arquitectura).
+- Singletons nuevos con `@Service()` en vez de `@Injectable({ providedIn: 'root' })`.
+- Providers de un módulo en `provide<Module>()` y registrados en la ruta del módulo, no en `app.config.ts`.
 
-### State Management
+### Routing
 
-- Use signals for local component state
-- Use `computed()` for derived state
-- Keep state transformations pure and predictable
-- Do NOT use `mutate` on signals, use `update` or `set` instead
+- Toda ruta de módulo con lazy loading (`loadChildren` / `loadComponent`).
+- Parámetros de ruta como `input()` del componente (`withComponentInputBinding()`); nada de suscribirse a `ActivatedRoute`.
+- Guards y resolvers funcionales (`CanActivateFn`, `ResolveFn`); NO DEBEN escribirse guards de clase.
+- Cada página define su `title` en la ruta.
 
-### Templates
+### Accesibilidad
 
-- Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
-- Do not assume globals like (`new Date()`) are available.
+- DEBE pasar todas las reglas AXE y cumplir WCAG AA: foco gestionado, contraste, ARIA correcto, navegación completa por teclado.
+- El lint de plantillas (`templateAccessibility`) es bloqueante.
 
-### Services
+### Lo último en general
 
-- Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
-- Use the `inject()` function instead of constructor injection (except pure use cases in `application/`, see Architecture)
+- Angular, TypeScript, Vitest, ESLint y Tailwind se mantienen en su última versión estable. `ng update` al salir cada minor de Angular, aplicando sus migraciones automáticas (`ng generate @angular/core:<migración>`).
+- Antes de usar una API se verifica que no esté marcada como deprecada en la versión instalada; si lo está, se usa su reemplazo.
+- APIs nativas de la plataforma antes que librerías (`Intl`, `structuredClone`, `URL`, `AbortController`, CSS moderno).
+- NO DEBE agregarse una dependencia sin justificar en el pull request por qué no basta Angular o la plataforma.
+- Herramientas actuales y no sus antecesoras: Vitest (no Karma/Jasmine), ESLint flat config (no TSLint), builder `@angular/build` (no webpack), Playwright para E2E (no Protractor/Cypress).
