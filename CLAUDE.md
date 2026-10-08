@@ -22,6 +22,8 @@ npm run test:unit          # pruebas unitarias, una sola corrida
 npm run test:integration   # pruebas de integración (*.integration.spec.ts)
 npm run test:ci            # todas las pruebas con cobertura y umbrales
 npm run lint               # ESLint: reglas de Angular, sonarjs y límites de arquitectura
+npm run sonar              # test:ci + sonar:scan (necesita el SonarQube local del docker-compose.yml de pensilpos-backend)
+npm run sonar:scan         # solo sonar-scanner (la cobertura debe estar fresca)
 npm run build              # build de producción
 npm run verify             # lint + test:ci + build. DEBE pasar antes de dar una tarea por terminada
 ```
@@ -109,6 +111,7 @@ Configuración (Vitest a través de `@angular/build:unit-test`):
 
 - `angular.json` (`test`) decide qué corre: la configuración por defecto excluye `*.integration.spec.ts`; `-c integration` corre solo esas; `-c ci` corre todo con cobertura.
 - `vitest-base.config.mts` define el resto: orden aleatorio (`sequence.shuffle`), `restoreMocks` y umbrales de cobertura (80% global, 90% en `**/domain/**`). Bajar un umbral requiere ADR.
+- `npm run test:ci` escribe `coverage/pensildevs-web/lcov.info`, que `sonar-project.properties` lee en `sonar.javascript.lcov.reportPaths`. `npm run sonar` corre `test:ci` y luego `sonar:scan` contra el SonarQube local (`http://localhost:10000`, el mismo de `pensilpos-backend`).
 - Globals de Vitest activos (`describe`, `it`, `expect`, `vi`); en `domain/` y `application/` se importan explícitamente desde `vitest` para que el archivo siga siendo TypeScript puro.
 - La app es zoneless: NO DEBE usarse `fakeAsync`/`tick` (requieren zone.js). Se usa `await fixture.whenStable()` y `vi.useFakeTimers()`.
 - Las pruebas no usan `RouterTestingModule` ni `HttpClientTestingModule`; se usan los `provide*` equivalentes.

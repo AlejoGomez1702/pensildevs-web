@@ -11,6 +11,8 @@
     "test:integration": "ng test --configuration integration --no-watch",
     "test:ci": "ng test --configuration ci",
     "lint": "ng lint",
+    "sonar": "npm run test:ci && npm run sonar:scan",
+    "sonar:scan": "sonar-scanner-npm",
     "verify": "npm run lint && npm run test:ci && npm run build"
   },
   "private": true,
@@ -30,6 +32,7 @@
     "@angular/cli": "^22.2.2",
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "^10.0.1",
+    "@sonar/scan": "^5.0.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@vitest/coverage-v8": "^5.0.3",
     "angular-eslint": "22.5.0",
