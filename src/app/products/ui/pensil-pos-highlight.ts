@@ -15,11 +15,11 @@ const HIGHLIGHTED_FEATURES = 3;
   template: `
     <section
       aria-labelledby="pensil-pos-highlight-title"
-      class="overflow-hidden rounded-[2rem] bg-graphite text-on-graphite"
+      class="overflow-hidden rounded-[2rem] bg-graphite text-on-graphite [--focus:var(--pencil)]"
     >
       <div class="grid items-center gap-12 p-8 pb-16 sm:p-12 sm:pb-20 lg:grid-cols-2 lg:p-16 lg:pb-20">
         <div>
-          <p class="text-sm font-semibold tracking-[0.12em] text-pencil uppercase">Nuestro producto</p>
+          <p class="text-base font-semibold text-leaf-bright">Nuestro producto</p>
           <h2 id="pensil-pos-highlight-title" class="mt-3 text-4xl font-extrabold sm:text-5xl">
             {{ product.name }}
           </h2>

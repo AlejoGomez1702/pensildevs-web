@@ -1,32 +1,32 @@
 @import 'tailwindcss';
 
 /*
- * Pensil.Devs design tokens.
- * Concept: "from sketch to product". Graphite ink and warm paper, with two pencil colors:
+ * Pensil.Devs design tokens. Source of truth for the design system.
+ * Concept: "del boceto al producto". White paper and graphite ink, with two pencil colors:
  *   yellow (pencil) = action and attention: buttons, calls to action, highlights;
- *   green (leaf)    = results: success, growth, "done".
- * Semantic colors switch with the color scheme; components only use semantic tokens.
+ *   green  (leaf)   = companion accent and results: section labels, icons, success, growth, "done".
+ * Green accompanies; it never fills whole sections. Components only use these semantic tokens.
  */
 :root {
   color-scheme: light dark;
 
-  --paper: #faf8f3;
+  --paper: #ffffff;
   --paper-raised: #ffffff;
-  --paper-sunken: #f2eee4;
+  --paper-sunken: #f4f2ed;
   --ink: #16181d;
   --ink-muted: #545a66;
   --line: #e3ddcf;
+  --graphite: #16181d;
+  --on-graphite: #f5f3ee;
+  --leaf: #1d7a52;
+  --on-leaf: #ffffff;
+  --leaf-soft: #e3f2e8;
+  --leaf-text: #17704b;
+  --leaf-bright: #6fdca6;
   --pencil: #f6b81c;
   --pencil-strong: #e5a400;
   --on-pencil: #16181d;
   --pencil-text: #8a5800;
-  --leaf: #1d7a52;
-  --on-leaf: #ffffff;
-  --leaf-soft: #e2f2e8;
-  --leaf-text: #17704b;
-  --leaf-bright: #5fd09a;
-  --graphite: #16181d;
-  --on-graphite: #f5f3ee;
   --focus: #1f5fd1;
   --danger: #b42318;
 }
@@ -39,17 +39,17 @@
     --ink: #f2efe8;
     --ink-muted: #a9aeb9;
     --line: #2b2f38;
+    --graphite: #1f232b;
+    --on-graphite: #f5f3ee;
+    --leaf: #4cc38a;
+    --on-leaf: #0f1713;
+    --leaf-soft: #16291f;
+    --leaf-text: #6fd6a2;
+    --leaf-bright: #6fdca6;
     --pencil: #f8c444;
     --pencil-strong: #ffd166;
     --on-pencil: #16181d;
     --pencil-text: #f8c444;
-    --leaf: #4cc38a;
-    --on-leaf: #0f1713;
-    --leaf-soft: #16291f;
-    --leaf-text: #5fd09a;
-    --leaf-bright: #5fd09a;
-    --graphite: #1f232b;
-    --on-graphite: #f5f3ee;
     --focus: #8ab4ff;
     --danger: #ff9b8f;
   }
@@ -62,19 +62,26 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
-  --color-pencil: var(--pencil);
-  --color-pencil-strong: var(--pencil-strong);
-  --color-on-pencil: var(--on-pencil);
-  --color-pencil-text: var(--pencil-text);
+  --color-graphite: var(--graphite);
+  --color-on-graphite: var(--on-graphite);
   --color-leaf: var(--leaf);
   --color-on-leaf: var(--on-leaf);
   --color-leaf-soft: var(--leaf-soft);
   --color-leaf-text: var(--leaf-text);
   --color-leaf-bright: var(--leaf-bright);
-  --color-graphite: var(--graphite);
-  --color-on-graphite: var(--on-graphite);
+  --color-pencil: var(--pencil);
+  --color-pencil-strong: var(--pencil-strong);
+  --color-on-pencil: var(--on-pencil);
+  --color-pencil-text: var(--pencil-text);
   --color-focus: var(--focus);
   --color-danger: var(--danger);
+}
+
+/* Brand mark (logo and favicon): fixed colors, identical in both themes. */
+@theme {
+  --color-mark: #17704b;
+  --color-on-mark: #ffffff;
+  --color-mark-accent: #f6b81c;
 }
 
 @theme {
@@ -122,8 +129,9 @@
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
   }
 
+  /* Section label: sentence case in the brand green, never all caps. */
   .eyebrow {
-    @apply text-sm font-semibold tracking-[0.12em] text-pencil-text uppercase;
+    @apply text-base font-semibold text-leaf-text;
   }
 
   .card {
@@ -166,9 +174,10 @@
 
   /* Notebook grid used behind hero sections. */
   .notebook-grid {
+    /* Override --grid-line on dark surfaces (e.g. the green hero). */
     background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--line) 70%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--line) 70%, transparent) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line, color-mix(in oklab, var(--line) 70%, transparent)) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line, color-mix(in oklab, var(--line) 70%, transparent)) 1px, transparent 1px);
     background-size: 28px 28px;
     mask-image: radial-gradient(ellipse at 50% 30%, black 35%, transparent 75%);
   }
@@ -187,7 +196,7 @@
 }
 
 @utility btn-on-dark {
-  @apply btn border border-white/25 text-on-graphite hover:border-white/60;
+  @apply btn border border-on-graphite/35 text-on-graphite hover:border-on-graphite/80 hover:bg-on-graphite/5;
 }
 
 @media (prefers-reduced-motion: reduce) {

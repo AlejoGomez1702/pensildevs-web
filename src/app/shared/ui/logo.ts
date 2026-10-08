@@ -1,22 +1,44 @@
 import { Component } from '@angular/core';
 
-/** Pensil.Devs wordmark: a pencil tracing a stroke, followed by the name. */
+/**
+ * Pensil.Devs logo. The mark is the arriero mule from Pensilvania, Caldas (local roots), with a
+ * one-eyed alien riding behind its head, its antennae ending in signal nodes (innovation).
+ * This is the compact version, drawn with bold shapes for small sizes; it is also
+ * public/favicon.svg. Fixed brand colors in both themes.
+ */
 @Component({
   selector: 'app-logo',
-  host: { class: 'inline-flex items-center gap-2' },
+  host: { class: 'inline-flex items-center gap-2.5' },
   template: `
-    <svg viewBox="0 0 32 32" class="size-8 shrink-0" aria-hidden="true">
-      <rect width="32" height="32" rx="8" class="fill-graphite" />
-      <path d="M9 23.5 21.2 11.3a2.3 2.3 0 0 1 3.3 3.3L12.3 26.8 8 28z" class="fill-pencil" />
-      <path d="M8 28l1-4.5 3.3 3.3z" class="fill-on-graphite" />
-      <path d="M19.6 12.9l3.3 3.3" class="stroke-graphite" stroke-width="1.4" />
+    <svg viewBox="0 0 64 64" class="size-10 shrink-0" aria-hidden="true">
+      <rect width="64" height="64" rx="18" class="fill-mark" />
       <path
-        d="M6 9.5c2.5-1.8 4.6-1.8 6.4 0"
+        d="M27.5 14Q24 9.5 20 6M36.5 14Q40 9.5 44 6"
         fill="none"
-        class="stroke-on-graphite"
-        stroke-width="1.8"
+        class="stroke-on-mark"
+        stroke-width="3.6"
         stroke-linecap="round"
       />
+      <circle cx="20" cy="6" r="4.2" class="fill-mark-accent" />
+      <circle cx="44" cy="6" r="4.2" class="fill-mark-accent" />
+      <circle cx="32" cy="20" r="10" class="fill-on-mark" />
+      <circle cx="32" cy="19" r="4.4" class="fill-mark" />
+      <circle cx="33.6" cy="17.6" r="1.4" class="fill-on-mark" />
+      <g
+        class="fill-on-mark stroke-mark"
+        stroke-width="3"
+        paint-order="stroke"
+        stroke-linejoin="round"
+      >
+        <path d="M22.5 33C15 28 11 19 11 11C18.5 14.5 25.5 22.5 27.5 30.5Z" />
+        <path d="M41.5 33C49 28 53 19 53 11C45.5 14.5 38.5 22.5 36.5 30.5Z" />
+        <path
+          d="M20.5 35Q20.5 29 26.5 29H37.5Q43.5 29 43.5 35L41.6 53Q40.6 61 32 61Q23.4 61 22.4 53Z"
+        />
+      </g>
+      <circle cx="27" cy="39" r="2.6" class="fill-mark" />
+      <circle cx="37" cy="39" r="2.6" class="fill-mark" />
+      <path d="M23.6 50H40.4" class="stroke-mark" stroke-width="2.6" />
     </svg>
     <span class="font-display text-xl font-extrabold tracking-tight">
       Pensil<span class="text-pencil-text">.Devs</span>

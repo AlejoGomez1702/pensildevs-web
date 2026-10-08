@@ -151,6 +151,13 @@ Reglas:
 - Spec, ADR y documentación actualizados si cambió lo que describen.
 - Pull request revisado y aprobado por una persona.
 
+## Design system
+
+- Colores: **blanco** (`paper`) como fondo, **amarillo** (`pencil`) para la acción, **verde** (`leaf`) como acompañante y **grafito** (`graphite`) para bandas oscuras y el pie. El verde va en piezas pequeñas (etiquetas, íconos, checks, éxito); NO DEBE usarse como fondo de una sección completa. Las reglas completas están en el libro de marca.
+- Libro de marca, tokens, componentes e íconos: [design system Pensil.Devs](https://claude.ai/artifact/VHJ42zPuF6Az213tbnmWff). Un agente lo lee con la acción `read` del Artifact tool (`path: project/README.md`).
+- La fuente de verdad de los valores es `src/styles.css`. Un cambio de token se hace ahí y se refleja en el design system en el mismo pull request.
+- Los componentes usan solo tokens semánticos (`bg-forest`, `text-leaf-text`, `btn-primary`…); NO DEBEN usarse colores literales ni clases de color de Tailwind por defecto (`bg-green-700`).
+
 ## Angular moderno (v22) y lo último en general
 
 > You are an expert in TypeScript, Angular, and scalable web application development, dedicated to leveraging the absolute latest features of the framework. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices. *(Persona oficial de los archivos de reglas de Angular.)*

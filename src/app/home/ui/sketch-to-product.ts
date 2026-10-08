@@ -35,7 +35,7 @@ import { Component } from '@angular/core';
       </div>
 
       <!-- Product -->
-      <div class="absolute right-0 bottom-0 w-[74%] rotate-2 rounded-3xl border border-line bg-paper-raised p-5 shadow-2xl">
+      <div class="absolute right-0 bottom-0 w-[74%] rotate-2 rounded-3xl border border-line bg-paper-raised p-5 text-ink shadow-2xl">
         <div class="flex items-center justify-between">
           <p class="text-sm font-semibold">Ventas de hoy</p>
           <span class="rounded-full bg-leaf px-2.5 py-1 text-xs font-bold text-on-leaf">+18%</span>

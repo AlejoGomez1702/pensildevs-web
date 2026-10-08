@@ -8,7 +8,7 @@ import { Logo } from '../shared/ui/logo';
 @Component({
   selector: 'app-site-footer',
   imports: [Logo, RouterLink],
-  host: { class: 'block bg-graphite text-on-graphite', role: 'contentinfo' },
+  host: { class: 'block bg-graphite text-on-graphite [--focus:var(--pencil)]', role: 'contentinfo' },
   template: `
     <div class="container-page grid gap-12 py-16 md:grid-cols-12">
       <div class="md:col-span-4">
@@ -21,7 +21,7 @@ import { Logo } from '../shared/ui/logo';
       </div>
 
       <nav aria-labelledby="footer-services" class="md:col-span-3">
-        <h2 id="footer-services" class="font-sans text-sm font-semibold tracking-[0.12em] text-pencil uppercase">
+        <h2 id="footer-services" class="font-sans text-base font-semibold text-leaf-bright">
           Servicios
         </h2>
         <ul class="mt-4 grid gap-2">
@@ -36,7 +36,7 @@ import { Logo } from '../shared/ui/logo';
       </nav>
 
       <nav aria-labelledby="footer-company" class="md:col-span-2">
-        <h2 id="footer-company" class="font-sans text-sm font-semibold tracking-[0.12em] text-pencil uppercase">
+        <h2 id="footer-company" class="font-sans text-base font-semibold text-leaf-bright">
           Producto
         </h2>
         <ul class="mt-4 grid gap-2">
@@ -48,7 +48,7 @@ import { Logo } from '../shared/ui/logo';
       </nav>
 
       <div class="md:col-span-3">
-        <h2 class="font-sans text-sm font-semibold tracking-[0.12em] text-pencil uppercase">Escríbenos</h2>
+        <h2 class="font-sans text-base font-semibold text-leaf-bright">Escríbenos</h2>
         <ul class="mt-4 grid gap-2">
           <li>
             <a [href]="whatsAppUrl" target="_blank" rel="noopener" class="text-on-graphite/80 hover:text-on-graphite">

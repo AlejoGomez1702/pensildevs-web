@@ -40,10 +40,12 @@ Caso de uso: `SendContactRequest.execute(input)` → valida con el dominio y del
 ## Dirección visual
 
 - **Concepto:** "del boceto al producto". El lápiz traza la idea; el software la vuelve real.
-- **Color:** grafito (texto y superficies oscuras) y papel cálido como fondo, con dos colores de lápiz con significado fijo:
-  - **Amarillo (`pencil`) = acción y atención:** botones, llamados a la acción, resaltados, avisos. Texto oscuro sobre amarillo.
-  - **Verde (`leaf`) = resultados:** éxito, crecimiento, "ya quedó" (confirmaciones, lo que incluye un servicio, el paso final del proceso, indicadores al alza). Variantes `leaf-soft` (fondo), `leaf-text` (texto) y `leaf-bright` (sobre grafito).
-  - Todos los pares de color cumplen WCAG AA en modo claro y oscuro (verde: de 5.0:1 a 9.6:1).
+- **Color** (detalle en el [design system](https://claude.ai/artifact/VHJ42zPuF6Az213tbnmWff)):
+  - **Blanco (`paper`):** fondo de toda página, incluido el hero.
+  - **Amarillo (`pencil`):** acción y atención; texto oscuro encima.
+  - **Verde (`leaf`, `leaf-soft`, `leaf-text`, `leaf-bright`):** acompaña al blanco y al amarillo en piezas pequeñas (etiquetas de sección, íconos de servicios y producto, checks, crecimiento, confirmaciones, paso final del proceso). Nunca como fondo de sección.
+  - **Grafito (`graphite`):** banda de Pensil.Pos, contacto directo y pie; sobre él el foco es `pencil`.
+  - Todos los pares cumplen WCAG AA en claro y oscuro.
 - **Tipografía:** Bricolage Grotesque (títulos, con carácter) e Inter (texto, legibilidad).
 - **Detalles:** trazos tipo subrayado a mano en palabras clave, cuadrícula de cuaderno sutil en el hero, tarjetas con borde fino y sombra corta.
 

@@ -9,10 +9,10 @@ import type { ServiceOffering } from './service-offerings';
   host: { class: 'block h-full' },
   template: `
     <article
-      class="card group relative flex h-full flex-col p-6 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-ink/40"
+      class="card group relative flex h-full flex-col p-6 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-leaf/50"
     >
       <span
-        class="grid size-12 place-items-center rounded-2xl bg-paper-sunken text-ink transition-colors group-hover:bg-pencil group-hover:text-on-pencil"
+        class="grid size-12 place-items-center rounded-2xl bg-leaf-soft text-leaf-text transition-colors group-hover:bg-pencil group-hover:text-on-pencil"
       >
         <app-icon [name]="offering().icon" class="size-6" />
       </span>

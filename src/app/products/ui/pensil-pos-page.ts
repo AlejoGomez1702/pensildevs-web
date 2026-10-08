@@ -41,7 +41,7 @@ const DEMO_MESSAGE = 'Hola, Pensil.Devs. Quiero una demo de Pensil.Pos para mi n
       <ul class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         @for (feature of product.features; track feature.title) {
           <li class="card p-6">
-            <span class="grid size-12 place-items-center rounded-2xl bg-pencil text-on-pencil">
+            <span class="grid size-12 place-items-center rounded-2xl bg-leaf-soft text-leaf-text">
               <app-icon [name]="feature.icon" class="size-6" />
             </span>
             <h3 class="mt-5 text-xl font-bold">{{ feature.title }}</h3>
