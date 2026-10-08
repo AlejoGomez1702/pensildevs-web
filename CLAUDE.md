@@ -153,7 +153,22 @@ Reglas:
 
 ## Angular moderno (v22) y lo último en general
 
-Se usa siempre la API más reciente y estable de Angular. Si existe una API nueva y una legada para lo mismo, la legada NO DEBE aparecer en código nuevo. Ante la duda se consulta la documentación de la versión instalada (MCP `angular-cli` → `search_documentation`, `get_best_practices`).
+> You are an expert in TypeScript, Angular, and scalable web application development, dedicated to leveraging the absolute latest features of the framework. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices. *(Persona oficial de los archivos de reglas de Angular.)*
+
+Se usa siempre la API más reciente y estable de Angular. Si existe una API nueva y una legada para lo mismo, la legada NO DEBE aparecer en código nuevo. Estas reglas siguen las recomendaciones oficiales del equipo de Angular: [Develop with AI](https://angular.dev/ai/develop-with-ai), sus archivos de reglas (`best-practices.md`, `AGENTS.md`) y el [style guide](https://angular.dev/style-guide). Si algo aquí contradice la guía oficial vigente, gana la guía oficial y se corrige este archivo.
+
+### Flujo de trabajo para agentes de IA
+
+El repositorio trae el servidor MCP oficial del Angular CLI (`.mcp.json`). Todo agente DEBE seguir este ciclo, que es el flujo "Feature Development & TDD Loop" de la guía oficial:
+
+1. `list_projects` para conocer el workspace, el framework de pruebas y los targets.
+2. `get_best_practices` (con la ruta del workspace) antes de escribir o modificar código de Angular, para cargar las reglas de la versión instalada.
+3. `search_documentation` (con `version: 22`) ante cualquier duda de API o sintaxis. NO DEBE escribirse una API de Angular de memoria si hay duda de que siga vigente.
+4. TDD: escribir la prueba, verla fallar y luego implementar, usando `run_target` con `test` o `npm run test:unit`.
+5. Para ver la app: `devserver.start` y `devserver.wait_for_build` para vigilar la compilación; `devserver.stop` al terminar.
+6. Cerrar con `npm run verify`.
+
+Para migraciones de código existente se usan los schematics oficiales (`ng generate @angular/core:<migración>`) en vez de reescribir a mano. Referencias de contexto: [llms.txt](https://angular.dev/llms.txt) y [llms-full.txt](https://angular.dev/assets/context/llms-full.txt).
 
 ### Reactividad y detección de cambios
 
@@ -163,6 +178,7 @@ Se usa siempre la API más reciente y estable de Angular. Si existe una API nuev
 - `effect()` solo para sincronizar con el mundo no reactivo (DOM, `localStorage`, analítica). NO DEBE usarse para derivar estado ni para copiar un signal en otro.
 - Datos asíncronos en `ui/` con `resource()` cuyo `loader` llama a un caso de uso. `httpResource()` NO DEBE usarse en `ui/` (sería `HttpClient` fuera de `infrastructure/`).
 - RxJS solo donde aporta (streams de eventos); para pasar entre mundos se usa `toSignal()` / `toObservable()`. Nada de `subscribe` manual en componentes.
+- Las transformaciones de estado son puras y predecibles.
 
 ### Componentes y plantillas
 
@@ -172,8 +188,24 @@ Se usa siempre la API más reciente y estable de Angular. Si existe una API nuev
 - Control flow nativo (`@if`, `@for` con `track`, `@switch`), `@let` para alias locales y `@defer` (con `on viewport` o `on idle`) para lo que está debajo del primer pliegue.
 - Bindings `[class.x]` / `[style.x]`. NO DEBEN usarse `ngClass` ni `ngStyle`, ni importarse `CommonModule`.
 - `NgOptimizedImage` (`ngSrc`) para toda imagen estática; etiquetas autocerradas (`<app-x />`).
-- Componentes pequeños; plantillas inline si son cortas. Rutas de `templateUrl`/`styleUrl` relativas al archivo TS.
+- Componentes pequeños y enfocados en presentación: validaciones, transformaciones y reglas van a funciones o clases aparte (en esta arquitectura, a `domain/` o `application/`).
+- Plantilla inline si es corta; si no, `.ts`, `.html` y `.css` separados con el mismo nombre y rutas relativas al archivo TS.
+- Miembros que solo usa la plantilla son `protected`; lo que inicializa Angular (`input`, `model`, `output`, queries) es `readonly`.
+- Propiedades de Angular (dependencias inyectadas, inputs, outputs, queries) agrupadas al inicio de la clase, antes de los métodos.
+- Manejadores de eventos nombrados por lo que hacen (`sendContactRequest()`), no por el evento (`handleClick()`).
+- Hooks de ciclo de vida cortos: solo llaman métodos con nombre; se implementa su interfaz (`implements OnInit`).
+- Plantillas simples: si una expresión se complica, pasa a un `computed()`. En plantillas no se asumen globales como `new Date()`.
+- Pipes integrados importados uno por uno donde se usan; observables en plantilla con `AsyncPipe` (o mejor, convertidos con `toSignal()`).
 - Estilos con Tailwind 4; CSS de componente solo para lo que Tailwind no cubre.
+
+### Nombres y archivos (style guide oficial)
+
+- Archivos en kebab-case que coinciden con el identificador que contienen y sin sufijo de tipo: `ContactForm` vive en `contact-form.ts`, `contact-form.html`, `contact-form.css`, y su prueba en `contact-form.spec.ts`, en la misma carpeta.
+- Un concepto por archivo; ante la duda, archivos más pequeños.
+- NO DEBEN crearse archivos genéricos como `utils.ts`, `helpers.ts` o `common.ts`: cada cosa vive en el módulo y la capa a la que pertenece.
+- Organización por funcionalidad, nunca por tipo (`components/`, `services/`, `directives/`). Esto coincide con la screaming architecture.
+- Selectores con el prefijo `app-` (componentes en kebab-case, directivas de atributo en camelCase `[appX]`).
+- Ante una contradicción con el estilo de un archivo existente, prima la consistencia dentro del archivo.
 
 ### Formularios
 
